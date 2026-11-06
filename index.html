@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบสัมภาษณ์ค่ายรวมน้ำใจไปแม่แจ่ม ปีที่ 7</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>body { font-family: 'Noto Sans Thai', sans-serif; }</style>
+<style type="text/tailwindcss">
+  .inp { @apply w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-slate-900 text-sm sm:text-base bg-white focus:ring-2 focus:ring-slate-900 focus:outline-none; }
+  .lbl { @apply block text-xs sm:text-sm font-medium text-slate-500 mb-1; }
+  .btn { @apply w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-lg text-sm sm:text-base transition cursor-pointer shadow-xs disabled:opacity-60; }
+  .card { @apply bg-white rounded-xl shadow-xs border border-slate-200 p-6 sm:p-8 space-y-4; }
+  .hd { @apply border-b border-slate-100 pb-3; }
+  .hd h3 { @apply font-bold text-slate-900 text-base sm:text-lg; }
+  .hd p { @apply text-xs sm:text-sm text-slate-500 mt-0.5; }
+  .hbtn { @apply text-xs sm:text-sm px-3.5 py-1.5 rounded-md font-medium transition cursor-pointer; }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-900 flex flex-col justify-between">
+
+<header class="bg-slate-900 text-white shadow-sm sticky top-0 z-40 w-full">
+  <div class="w-full px-4 sm:px-8 py-3.5 flex justify-between items-center gap-2">
+    <h1 class="font-medium text-xs sm:text-base tracking-wide text-slate-100">ระบบสัมภาษณ์ค่ายรวมน้ำใจไปแม่แจ่ม ปีที่ 7</h1>
+    <div class="flex items-center gap-2 shrink-0">
+      <button id="header-admin-btn" onclick="openAdminLoginModal()" class="hbtn bg-slate-800 hover:bg-slate-700 text-slate-200">ระบบผู้ดูแล</button>
+      <div id="user-badge" class="hidden hbtn bg-slate-800 text-slate-200 truncate max-w-[130px] sm:max-w-none"></div>
+      <button id="header-logout-btn" onclick="handleLogout()" class="hidden hbtn bg-rose-950 hover:bg-rose-900 text-rose-200">ออกจากระบบ</button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-3xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex-grow flex flex-col justify-center">
+
+  <!-- Login -->
+  <section id="view-login" class="card max-w-md w-full mx-auto my-auto sm:p-10">
+    <div class="text-center mb-2">
+      <h2 class="text-lg sm:text-xl font-bold">เข้าสู่ระบบลงคิวสัมภาษณ์</h2>
+      <p class="text-xs text-slate-500 mt-1">กรอกรหัสนิสิตเพื่อตรวจสอบสิทธิ์และเลือกเวลาสัมภาษณ์</p>
+    </div>
+    <form onsubmit="handleLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1.5">รหัสนิสิต (11 หลัก)</label>
+        <input type="text" id="input-student-id" required placeholder="รหัสนิสิต" inputmode="numeric" class="inp text-center text-lg tracking-wider bg-slate-50">
+      </div>
+      <button type="submit" id="btn-login" class="btn">เข้าสู่ระบบ</button>
+    </form>
+    <div id="login-alert" class="hidden"></div>
+  </section>
+
+  <!-- Student app -->
+  <div id="app-navigation" class="hidden space-y-6 w-full">
+    <div class="grid grid-cols-3 gap-1 bg-slate-200 p-1 rounded-xl text-xs sm:text-sm font-medium">
+      <button onclick="switchTab('profile')" id="nav-btn-profile">โปรไฟล์</button>
+      <button onclick="switchTab('mybooking')" id="nav-btn-mybooking">คิวของคุณ</button>
+      <button onclick="switchTab('booking')" id="nav-btn-booking">ลงคิว</button>
+    </div>
+
+    <div id="tab-profile" class="card space-y-5">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-base sm:text-lg">ข้อมูลส่วนตัวนิสิต</h3>
+        <span class="text-xs sm:text-sm bg-slate-100 text-slate-700 px-3 py-1 rounded-md font-medium" id="profile-status-badge"></span>
+      </div>
+      <form onsubmit="handleUpdateProfile(event)" class="space-y-4">
+        <div><label class="lbl">รหัสนิสิต (แก้ไขไม่ได้)</label><input id="pf-studentId" disabled class="inp bg-slate-100 text-slate-500"></div>
+        <div><label class="lbl">ชื่อ - นามสกุล</label><input id="pf-fullName" required class="inp"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label class="lbl">ชื่อเล่น</label><input id="pf-nickname" required class="inp"></div>
+          <div><label class="lbl">ชั้นปี</label><select id="pf-year" required class="inp"></select></div>
+        </div>
+        <div><label class="lbl">คณะ / วิทยาลัย</label><select id="pf-faculty" required class="inp"></select></div>
+        <div><label class="lbl">สาขาวิชา / วิชาเอก</label><input id="pf-major" required class="inp"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div><label class="lbl">เบอร์โทรศัพท์</label><input id="pf-phone" required class="inp"></div>
+          <div><label class="lbl">อีเมล</label><input type="email" id="pf-email" required class="inp"></div>
+        </div>
+        <button type="submit" id="btn-save-profile" class="btn">บันทึกการแก้ไขข้อมูล</button>
+      </form>
+      <div id="profile-alert" class="hidden"></div>
+    </div>
+
+    <div id="tab-mybooking" class="hidden card">
+      <div class="hd"><h3>รายละเอียดคิวสัมภาษณ์ของคุณ</h3><p>ตรวจสอบวัน เวลา และจัดการยกเลิกคิวได้ที่นี่</p></div>
+      <div id="my-booking-details" class="space-y-3"></div>
+    </div>
+
+    <div id="tab-booking" class="hidden card">
+      <div class="hd"><h3>เลือกวันและรอบเวลาสัมภาษณ์</h3><p>รอบละ 10 นาที (รับ 1 คนต่อรอบ)</p></div>
+      <div class="flex gap-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+        <button onclick="switchDayFilter('วันที่ 10')" id="day-btn-10" class="flex-1 py-2 text-xs sm:text-sm font-medium rounded-md transition cursor-pointer">วันที่ 10</button>
+        <button onclick="switchDayFilter('วันที่ 12')" id="day-btn-12" class="flex-1 py-2 text-xs sm:text-sm font-medium rounded-md transition cursor-pointer">วันที่ 12</button>
+      </div>
+      <div id="slots-container" class="space-y-2.5 max-h-[30rem] overflow-y-auto pr-1"></div>
+    </div>
+  </div>
+
+  <!-- Admin -->
+  <div id="admin-view-panel" class="hidden card space-y-6 w-full">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
+      <div>
+        <h2 class="font-bold text-base sm:text-xl">แผงควบคุมผู้ดูแลระบบ (Admin Overview)</h2>
+        <p class="text-xs sm:text-sm text-slate-500">ภาพรวมสิทธิ์และการจองคิวสัมภาษณ์ทั้งหมด (ซิงค์อัตโนมัติ)</p>
+      </div>
+      <button onclick="handleAdminLogout()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer">ออกจากระบบ Admin</button>
+    </div>
+    <div id="admin-stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+    <div class="border-t border-slate-100 pt-4 space-y-3">
+      <h4 class="font-bold text-slate-800 text-sm sm:text-base">ตารางการจองรอบสัมภาษณ์ทั้งหมด</h4>
+      <div id="admin-slots-list" class="space-y-2 max-h-[30rem] overflow-y-auto border border-slate-200 rounded-lg p-3 bg-slate-50"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Admin login modal -->
+<div id="admin-login-modal" class="fixed inset-0 bg-slate-950/40 z-50 hidden items-center justify-center p-4 backdrop-blur-xs">
+  <div class="card w-full max-w-sm shadow-lg">
+    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+      <h3 class="font-bold text-sm sm:text-base">เข้าสู่ระบบผู้ดูแลระบบ</h3>
+      <button onclick="closeAdminLoginModal()" class="text-slate-400 hover:text-slate-600 font-bold text-base cursor-pointer">✕</button>
+    </div>
+    <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+      <div><label class="lbl">Username</label><input id="admin-user" required autocomplete="off" class="inp bg-slate-50"></div>
+      <div><label class="lbl">Password</label><input type="password" id="admin-pass" required class="inp bg-slate-50"></div>
+      <button type="submit" id="btn-admin-login" class="btn">เข้าสู่ระบบ Admin</button>
+    </form>
+    <div id="admin-login-alert" class="hidden p-2.5 rounded-lg text-xs sm:text-sm text-center text-rose-600 bg-rose-50 border border-rose-200"></div>
+  </div>
+</div>
+
+<footer class="text-center py-6 text-xs sm:text-sm text-slate-400">ศูนย์นิสิตจิตอาสา มหาวิทยาลัยศรีนครินทรวิโรฒ</footer>
+
+<script>
+  // ใส่ URL ของ Apps Script Web App (ที่ลงท้ายด้วย /exec)
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxVihGX623Lxrqg9y31v4SQYFLPZdUZbOYNSYUOjEcwkP-3a8fXecgIhdHndIW3RNyc/exec';
+  const POLL_MS = 8000;
+
+  const YEARS = ['ปี 1 (รหัส 69)','ปี 2 (รหัส 68)','ปี 3 (รหัส 67)','ปี 4 (รหัส 66)','ปี 5 (รหัส 65)'];
+  const FACULTIES = ['คณะมนุษยศาสตร์','คณะวิทยาศาสตร์','คณะสังคมศาสตร์','คณะพลศึกษา','คณะศึกษาศาสตร์','คณะพยาบาลศาสตร์','คณะแพทยศาสตร์','คณะวิศวกรรมศาสตร์','คณะศิลปกรรมศาสตร์','คณะทันตแพทยศาสตร์','คณะเภสัชศาสตร์','คณะกายภาพบำบัด','คณะเศรษฐศาสตร์','คณะบริหารธุรกิจเพื่อสังคม','วิทยาลัยนวัตกรรมสื่อสารสังคม','วิทยาลัยโพธิวิชชาลัย','วิทยาลัยนานาชาติเพื่อศึกษาความยั่งยืน'];
+
+  const TAB_ON  = 'py-2.5 rounded-lg transition bg-slate-900 text-white shadow-xs cursor-pointer font-medium';
+  const TAB_OFF = 'py-2.5 rounded-lg transition text-slate-600 hover:text-slate-900 cursor-pointer font-medium';
+  const DAY_ON  = 'flex-1 py-2 text-xs sm:text-sm font-medium rounded-md bg-slate-900 text-white shadow-xs transition cursor-pointer';
+  const DAY_OFF = 'flex-1 py-2 text-xs sm:text-sm font-medium rounded-md text-slate-600 hover:text-slate-900 transition cursor-pointer';
+  const ALERT_ERR = 'p-3 rounded-lg text-xs sm:text-sm text-center font-medium bg-rose-50 text-rose-700 border border-rose-200';
+  const ALERT_OK  = 'p-3 rounded-lg text-xs sm:text-sm text-center font-medium bg-slate-100 text-slate-800 border border-slate-200';
+
+  let currentUser = null, allSlots = [], currentDayFilter = 'วันที่ 10';
+  let pollingTimer = null, adminPollingTimer = null, adminToken = null;
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // เรียก Apps Script ผ่าน fetch (ใช้ text/plain เพื่อเลี่ยง CORS preflight)
+  async function api(action, ...args) {
+    const r = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, args })
+    });
+    if (!r.ok) throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ (' + r.status + ')');
+    return r.json();
+  }
+
+  function showAlert(el, msg, ok) {
+    el.textContent = msg;
+    el.className = (ok ? ALERT_OK : ALERT_ERR) + ' mt-2';
+  }
+
+  function init() {
+    $('pf-year').innerHTML = YEARS.map(y => `<option>${y}</option>`).join('');
+    $('pf-faculty').innerHTML = FACULTIES.map(f => `<option>${f}</option>`).join('');
+    switchTab('profile');
+    switchDayFilter('วันที่ 10');
+  }
+
+  // ---------- Student ----------
+  async function handleLogin(e) {
+    e.preventDefault();
+    const id = $('input-student-id').value.trim();
+    const btn = $('btn-login'), box = $('login-alert');
+    if (!id) return;
+    btn.disabled = true; btn.textContent = 'กำลังตรวจสอบสิทธิ์...';
+    try {
+      const res = await api('loginStudent', id);
+      if (res.success) {
+        currentUser = res.profile;
+        $('view-login').classList.add('hidden');
+        $('app-navigation').classList.remove('hidden');
+        $('user-badge').textContent = currentUser.fullName;
+        $('user-badge').classList.remove('hidden');
+        $('header-admin-btn').classList.add('hidden');
+        $('header-logout-btn').classList.remove('hidden');
+        box.classList.add('hidden');
+        populateProfileForm(currentUser);
+        updateUIWithData(res.slots, res.myBooking);
+        startPolling();
+      } else showAlert(box, res.message, false);
+    } catch (err) {
+      showAlert(box, 'เกิดข้อผิดพลาด: ' + err.message, false);
+    }
+    btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
+  }
+
+  function handleLogout() {
+    currentUser = null;
+    clearInterval(pollingTimer);
+    $('app-navigation').classList.add('hidden');
+    $('view-login').classList.remove('hidden');
+    $('user-badge').classList.add('hidden');
+    $('header-logout-btn').classList.add('hidden');
+    $('header-admin-btn').classList.remove('hidden');
+    $('input-student-id').value = '';
+  }
+
+  function startPolling() {
+    clearInterval(pollingTimer);
+    pollingTimer = setInterval(async () => {
+      if (!currentUser || document.hidden) return;
+      try {
+        const res = await api('getAvailableSlots', currentUser.studentId);
+        updateUIWithData(res.slots, res.myBooking);
+      } catch (_) {}
+    }, POLL_MS);
+  }
+
+  function updateUIWithData(slots, myBooking) {
+    allSlots = slots || [];
+    renderSlots();
+    renderMyBookingTab(myBooking);
+  }
+
+  function populateProfileForm(p) {
+    $('pf-studentId').value = p.studentId;
+    $('pf-fullName').value = p.fullName;
+    $('pf-nickname').value = p.nickname;
+    $('pf-year').value = p.year || YEARS[0];
+    $('pf-faculty').value = p.faculty || 'คณะสังคมศาสตร์';
+    $('pf-major').value = p.major;
+    $('pf-phone').value = p.phone;
+    $('pf-email').value = p.email;
+    $('profile-status-badge').textContent = p.status || 'ยืนยันสิทธิ์';
+  }
+
+  function switchTab(name) {
+    ['profile', 'mybooking', 'booking'].forEach(t => {
+      $('tab-' + t).classList.toggle('hidden', t !== name);
+      $('nav-btn-' + t).className = t === name ? TAB_ON : TAB_OFF;
+    });
+  }
+
+  async function handleUpdateProfile(e) {
+    e.preventDefault();
+    const btn = $('btn-save-profile'), box = $('profile-alert');
+    const f = {
+      studentId: $('pf-studentId').value, fullName: $('pf-fullName').value, nickname: $('pf-nickname').value,
+      year: $('pf-year').value, faculty: $('pf-faculty').value, major: $('pf-major').value,
+      phone: $('pf-phone').value, email: $('pf-email').value
+    };
+    btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+    try {
+      const res = await api('updateStudentProfile', f);
+      showAlert(box, res.message, res.success);
+      if (res.success) { currentUser.fullName = f.fullName; $('user-badge').textContent = f.fullName; }
+    } catch (err) {
+      showAlert(box, 'เกิดข้อผิดพลาด: ' + err.message, false);
+    }
+    btn.disabled = false; btn.textContent = 'บันทึกการแก้ไขข้อมูล';
+  }
+
+  function switchDayFilter(day) {
+    currentDayFilter = day;
+    $('day-btn-10').className = day === 'วันที่ 10' ? DAY_ON : DAY_OFF;
+    $('day-btn-12').className = day === 'วันที่ 12' ? DAY_ON : DAY_OFF;
+    renderSlots();
+  }
+
+  function renderSlots() {
+    const box = $('slots-container');
+    const list = allSlots.filter(s => s.day === currentDayFilter);
+    if (!list.length) {
+      box.innerHTML = '<div class="text-center py-8 text-xs sm:text-sm text-slate-400">ยังไม่มีรอบเวลาในวันนี้</div>';
+      return;
+    }
+    box.innerHTML = list.map(s => {
+      const cls = s.isBookedByMe ? 'bg-slate-100 border-slate-300' : s.isFull ? 'bg-slate-50 border-slate-200 opacity-60' : 'bg-white border-slate-200 hover:border-slate-400';
+      const action = s.isBookedByMe
+        ? '<span class="text-xs sm:text-sm bg-slate-900 text-white px-3.5 py-1.5 rounded-md font-medium">คิวของคุณ</span>'
+        : s.isFull
+          ? '<span class="text-xs sm:text-sm text-slate-400 font-medium px-2 py-1">เต็มแล้ว</span>'
+          : `<button onclick="bookSlot('${esc(s.slotId)}')" class="bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-medium px-4 py-1.5 rounded-md shadow-xs transition cursor-pointer">เลือกจอง</button>`;
+      return `<div class="p-3.5 sm:p-4 rounded-lg border flex justify-between items-center transition ${cls}">
+        <div><span class="text-xs sm:text-base font-medium text-slate-800 block">${esc(s.time)}</span>
+        <span class="text-[11px] sm:text-xs text-slate-400">สถานะ: ${s.isFull ? 'เต็ม' : 'ว่าง'}</span></div>
+        <div>${action}</div></div>`;
+    }).join('');
+  }
+
+  function renderMyBookingTab(b) {
+    $('my-booking-details').innerHTML = b ? `
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-5 space-y-3">
+        <div><span class="text-[11px] sm:text-xs uppercase font-medium tracking-wider text-slate-500 block">สถานะการจอง</span>
+        <span class="text-base sm:text-xl font-bold">${esc(b.day)} เวลา ${esc(b.time)}</span></div>
+        <div class="text-xs sm:text-sm text-slate-600">
+          <p>ผู้จอง: ${esc(currentUser.fullName)} (${esc(currentUser.studentId)})</p>
+          <p>จองเมื่อ: ${esc(b.bookedTime || '-')}</p></div>
+        <button onclick="cancelMyBooking()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs sm:text-sm font-medium py-2.5 rounded-lg transition cursor-pointer">ยกเลิกคิวนี้</button>
+      </div>` : `
+      <div class="text-center py-10 bg-slate-50/50 border border-dashed border-slate-200 rounded-lg space-y-3">
+        <p class="text-xs sm:text-sm text-slate-500">คุณยังไม่ได้จองคิวสัมภาษณ์</p>
+        <button onclick="switchTab('booking')" class="text-xs sm:text-sm bg-slate-900 text-white px-5 py-2.5 rounded-lg font-medium shadow-xs cursor-pointer hover:bg-slate-800">ไปเลือกจองคิว</button>
+      </div>`;
+  }
+
+  async function bookSlot(slotId) {
+    if (!confirm('ยืนยันการจองรอบเวลานี้ใช่หรือไม่?')) return;
+    try {
+      const res = await api('bookInterviewSlot', currentUser.studentId, slotId);
+      alert(res.message);
+      if (res.success) { updateUIWithData(res.slots, res.myBooking); switchTab('mybooking'); }
+    } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
+  }
+
+  async function cancelMyBooking() {
+    if (!confirm('คุณต้องการยกเลิกคิวสัมภาษณ์นี้ใช่หรือไม่?')) return;
+    try {
+      const res = await api('cancelBooking', currentUser.studentId);
+      alert(res.message);
+      updateUIWithData(res.slots, res.myBooking);
+    } catch (err) { alert('เกิดข้อผิดพลาด: ' + err.message); }
+  }
+
+  // ---------- Admin ----------
+  function openAdminLoginModal() {
+    $('admin-login-modal').classList.remove('hidden');
+    $('admin-login-modal').classList.add('flex');
+    $('admin-user').value = ''; $('admin-pass').value = '';
+    $('admin-login-alert').classList.add('hidden');
+  }
+  function closeAdminLoginModal() {
+    $('admin-login-modal').classList.add('hidden');
+    $('admin-login-modal').classList.remove('flex');
+  }
+
+  async function handleAdminLogin(e) {
+    e.preventDefault();
+    const btn = $('btn-admin-login'), box = $('admin-login-alert');
+    btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ...';
+    try {
+      const res = await api('adminLogin', $('admin-user').value.trim(), $('admin-pass').value.trim());
+      if (res.success) { adminToken = res.token; closeAdminLoginModal(); openAdminPanel(); }
+      else { box.textContent = res.message; box.classList.remove('hidden'); }
+    } catch (err) {
+      box.textContent = 'เกิดข้อผิดพลาด: ' + err.message; box.classList.remove('hidden');
+    }
+    btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ Admin';
+  }
+
+  function openAdminPanel() {
+    $('admin-view-panel').classList.remove('hidden');
+    $('view-login').classList.add('hidden');
+    $('header-admin-btn').classList.add('hidden');
+    loadAdminData();
+    clearInterval(adminPollingTimer);
+    adminPollingTimer = setInterval(() => { if (!document.hidden) loadAdminData(); }, POLL_MS);
+  }
+
+  function handleAdminLogout() {
+    clearInterval(adminPollingTimer);
+    adminToken = null;
+    $('admin-view-panel').classList.add('hidden');
+    $('view-login').classList.remove('hidden');
+    $('header-admin-btn').classList.remove('hidden');
+  }
+
+  async function loadAdminData() {
+    try {
+      const data = await api('getAdminOverview', adminToken);
+      if (data.expired) { alert(data.message); handleAdminLogout(); return; }
+      if (data.success) updateAdminUI(data);
+    } catch (_) {}
+  }
+
+  function updateAdminUI(d) {
+    const stat = (label, v) => `<div class="bg-slate-50 border border-slate-200 p-3.5 rounded-lg text-center"><span class="text-xs text-slate-500 block mb-1">${label}</span><span class="text-base sm:text-xl font-bold">${v}</span></div>`;
+    $('admin-stats').innerHTML = stat('มีสิทธิ์ทั้งหมด', d.stats.totalEligible) + stat('จองแล้ว', d.stats.bookedCount) + stat('ยังไม่จอง', d.stats.remainingCount) + stat('สละสิทธิ์', d.stats.canceledCount);
+    $('admin-slots-list').innerHTML = d.slots.map(s => `
+      <div class="p-3 bg-white border border-slate-200 rounded-lg flex justify-between items-center text-xs sm:text-sm">
+        <div><span class="font-medium text-slate-800">${esc(s.day)} (${esc(s.time)})</span><br><span class="text-slate-500">${s.studentName ? esc(s.studentName) + ' · ' + esc(s.studentId) : 'ว่าง'}</span></div>
+        <span class="px-2.5 py-1 rounded text-xs font-medium ${s.studentId ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}">${s.studentId ? 'จองแล้ว' : 'ว่าง'}</span>
+      </div>`).join('');
+  }
+
+  init();
+</script>
+</body>
+</html>
